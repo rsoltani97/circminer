@@ -25,6 +25,7 @@ int stage = 2;
 int maxCheckSumLen = sizeof(uint16_t) * 8 / 2;    // 2bit per bp
 int reportMapping = DISCARDMAPREPORT;
 int seqcnt = 0;
+bool qualityControl = false;
 
 char gtfFilename[FILE_NAME_MAX_LEN];
 char referenceFilename[FILE_NAME_MAX_LEN];
@@ -83,11 +84,12 @@ int parse_command(int argc, char *argv[]) {
                     {"internal-sort",     no_argument,       0, 'Z'},
                     {"sam",               no_argument,       0, 'A'},
                     {"pam",               no_argument,       0, 'P'},
+                    {"qc",               no_argument,       0, 'Q'},
                     {0,                   0,                 0, 0},
             };
 
     while (-1 !=
-           (opt = getopt_long(argc, argv, "hvims:1:2:r:g:k:l:o:t:d:a:e:c:w:S:T:I:C:q:zZAP", long_opt, &opt_index))) {
+           (opt = getopt_long(argc, argv, "hvims:1:2:r:g:k:l:o:t:d:a:e:c:w:S:T:I:C:q:zZAPQ", long_opt, &opt_index))) {
         switch (opt) {
             case 'h': {
                 printHELP();
@@ -208,6 +210,10 @@ int parse_command(int argc, char *argv[]) {
             }
             case 'P': {
                 reportMapping = PAMFORMAT;
+                break;
+            }
+            case 'Q': {
+                qualityControl = true;
                 break;
             }
             case '?': {

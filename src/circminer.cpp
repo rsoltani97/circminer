@@ -377,6 +377,12 @@ void *map_reads(void *args) {
 
         if (current_record1 == NULL)
             break;
+
+        if (contigNum == 0 and qualityControl) {
+            if (!FASTQParser::quality_control(current_record1, current_record2))
+                continue;
+        }
+
         if (pairedEnd) {
             state = filter_read.process_read(fa->id, current_record1, current_record2, fa->kmer_size, fa->fl, fa->bl,
                                              *(fa->fbc_r1), *(fa->bbc_r1), *(fa->fbc_r2), *(fa->bbc_r2));

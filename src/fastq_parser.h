@@ -52,6 +52,7 @@ public:
     void set_mate(FASTQParser *mq);
 
     Record *get_next_read(int thread_id);
+    static bool quality_control(Record* record1, Record* record2);
 };
 
 inline bool FASTQParser::has_next(void) {

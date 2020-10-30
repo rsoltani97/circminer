@@ -103,6 +103,7 @@ extern int maxChainLen;
 extern int threadCount;
 extern int stage;
 extern int reportMapping;
+extern bool qualityControl;
 
 extern char gtfFilename[FILE_NAME_MAX_LEN];
 extern char referenceFilename[FILE_NAME_MAX_LEN];
@@ -432,6 +433,7 @@ struct Record {
     char *qual;
     char *rqual;
 
+    uint32_t qual_len;
     uint32_t seq_len;
 
     MatchedRead *mr;

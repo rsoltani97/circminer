@@ -131,7 +131,7 @@ Record *FASTQParser::get_next_read(int thread_id) {
         assert(current_record[thread_id].comment[0] == '+');
         current_record[thread_id].comment[1] = '\0';
 
-        read_line(&current_record[thread_id].qual);
+        current_record[thread_id].qual_len = read_line(&current_record[thread_id].qual);
 
         set_reverse_comp(thread_id);
         return current_record + thread_id;
@@ -164,19 +164,19 @@ void FASTQParser::set_reverse_comp(int r_ind) {
     current_record[r_ind].rcseq[len] = '\0';
 
     // reverse qual
-    uint32_t qual_len = strlen(current_record[r_ind].qual);
-    if (qual_len != len) {
-        fprintf(stderr, "ERROR: read: %s, length of sequence (%d) does not match with quality (%d)!\nAborting\n",
-                current_record[r_ind].rname, len, qual_len);
-        exit(1);
-    }
-
-    i = len;
+//    uint32_t qual_len = strlen(current_record[r_ind].qual);
+//    if (qual_len != len) {
+//        fprintf(stderr, "ERROR: read: %s, length of sequence (%d) does not match with quality (%d)!\nAborting\n",
+//                current_record[r_ind].rname, len, qual_len);
+//        exit(1);
+//    }
+    uint32_t qlen = current_record[r_ind].qual_len;
+    i = qlen;
     do {
         --i;
-        current_record[r_ind].rqual[len - i - 1] = current_record[r_ind].qual[i];
+        current_record[r_ind].rqual[qlen - i - 1] = current_record[r_ind].qual[i];
     } while (i != 0);
-    current_record[r_ind].rqual[len] = '\0';
+    current_record[r_ind].rqual[qlen] = '\0';
 }
 
 int FASTQParser::extract_map_info(char *str, int r_ind) {
@@ -268,4 +268,25 @@ void FASTQParser::fill_map_info(int cnt, int r_ind) {
             current_record[r_ind].mr->contig_num = 0;
         }
     }
+}
+
+bool FASTQParser::quality_control(Record *record1, Record *record2) {
+    if (pairedEnd and strcmp(record1->rname, record2->rname)) {
+        Logger::instance().error("Mate information is not matching: %s <> %s ... Skipping the read.  \n",
+                                 record1->rname, record2->rname);
+        return false;
+    }
+    if (record1->seq_len != record1->qual_len) {
+        Logger::instance().error(
+                "Bad read, quality length does not match sequence length: %s %d <> %d ... Skipping the read. \n",
+                record1->rname, record1->seq_len, record1->qual_len);
+        return false;
+    }
+    if (pairedEnd and record2->seq_len != record2->qual_len) {
+        Logger::instance().error(
+                "Bad read, quality length does not match sequence length: %s %d <> %d ... Skipping the read. \n",
+                record2->rname, record2->seq_len, record2->qual_len);
+        return false;
+    }
+    return true;
 }
